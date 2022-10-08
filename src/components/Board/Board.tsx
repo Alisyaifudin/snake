@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/app/hooks";
-import { addFood, changeDirection, MOVE, move } from "../../redux/gameSlice";
+import { addFood, changeDirection, MOVE, move, pause } from "../../redux/gameSlice";
 import { clearBoard, drawObject, generateRandomPosition } from "../../utils";
 
 export interface BoardProps {
@@ -10,36 +10,37 @@ export interface BoardProps {
 
 function Board({ height, width }: BoardProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
+	const [start, setStart] = useState(false);
 	const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
-	const [locked, setLocked] = useState(false);
 	const snake = useAppSelector((state) => state.game.snake);
-  const food = useAppSelector((state) => state.game.food);
+	const food = useAppSelector((state) => state.game.food);
 	const end = useAppSelector((state) => state.game.end);
+	const paused = useAppSelector((state) => state.game.paused);
 	const [time, setTime] = useState(0);
 	const speed = useAppSelector((state) => state.game.speed);
 	const dispatch = useAppDispatch();
 	useEffect(() => {
+		if (!start) return;
 		const interval = setInterval(() => {
 			setTime((prev) => prev + 1);
-		}, 1000 / (speed/100));
-		if (end) {
+		}, 1000 / (speed / 100));
+		if (end || paused) {
 			clearInterval(interval);
 			window.removeEventListener("keydown", handleKeyDown);
 		}
 		return () => clearInterval(interval);
-	}, [speed, end]);
+	}, [speed, end, paused, start]);
 	useEffect(() => {
-    if(!food) return;
+		if (!food) return;
 		setContext(canvasRef.current?.getContext("2d") ?? null);
 		clearBoard(context, width, height);
 		drawObject(context, [food], "#676FA3");
 		drawObject(context, snake, "#91c483");
 		dispatch(move());
-		setLocked(false)
-	}, [context, time]);
+	}, [context, time, food]);
 
 	const handleKeyDown = (e: KeyboardEvent) => {
-		if (locked) return;
+		if (!start) setStart(true);
 		switch (e.key) {
 			case "ArrowUp":
 				dispatch(changeDirection(MOVE.UP));
@@ -53,14 +54,15 @@ function Board({ height, width }: BoardProps) {
 			case "ArrowRight":
 				dispatch(changeDirection(MOVE.RIGHT));
 				break;
+			case " ":
+				dispatch(pause());
 			default:
 				break;
 		}
-		setLocked(true);
 	};
 	useEffect(() => {
 		window.addEventListener("keydown", handleKeyDown);
-    dispatch(addFood())
+		dispatch(addFood());
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, []);
 	return (

@@ -27,6 +27,7 @@ export interface GameState {
 	end: boolean;
 	paused: boolean;
 	speed: number;
+	changed: boolean;
 }
 
 const initialPosition = [
@@ -45,7 +46,8 @@ const initialState: GameState = {
 	},
 	end: false,
 	paused: false,
-	speed: 100,
+	speed: 300,
+	changed: false,
 };
 
 export const gameSlice = createSlice({
@@ -81,14 +83,19 @@ export const gameSlice = createSlice({
 			if (state.food && state.food.x === newHead.x && state.food.y === newHead.y) {
 				const food = generateRandomPosition(dimensions.width - 20, dimensions.height - 20, snake);
 				state.food = food;
-				if (state.speed < 400) state.speed += 10;
+				if (state.speed < 2000) state.speed += 10;
 			} else {
 				snake.shift();
 			}
 			snake.push(newHead);
+			state.changed = false;
 		},
 		changeDirection: (state, action: PayloadAction<MOVE>) => {
-			if (action.payload !== state.oppositeMove && action.payload !== state.move) {
+			if (
+				action.payload !== state.oppositeMove &&
+				action.payload !== state.move &&
+				!state.changed
+			) {
 				state.move = action.payload;
 				switch (action.payload) {
 					case MOVE.UP:
@@ -106,6 +113,7 @@ export const gameSlice = createSlice({
 					default:
 						break;
 				}
+				state.changed = true;
 			}
 		},
 		addFood: (state) => {
@@ -113,8 +121,8 @@ export const gameSlice = createSlice({
 			const food = generateRandomPosition(dimensions.width - 20, dimensions.height - 20, snake);
 			state.food = food;
 		},
-		setPaused: (state, action: PayloadAction<boolean>) => {
-			state.paused = action.payload;
+		pause: (state) => {
+			state.paused = !state.paused;
 		},
 		reset: (state) => {
 			state.end = false;
@@ -125,6 +133,6 @@ export const gameSlice = createSlice({
 	},
 });
 
-export const { move, changeDirection, addFood } = gameSlice.actions;
+export const { move, changeDirection, addFood, pause, reset } = gameSlice.actions;
 
 export default gameSlice.reducer;
