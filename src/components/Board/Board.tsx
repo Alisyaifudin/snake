@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/app/hooks";
-import { changeDirection, MOVE, move } from "../../redux/gameSlice";
+import { addFood, changeDirection, MOVE, move } from "../../redux/gameSlice";
 import { clearBoard, drawObject, generateRandomPosition } from "../../utils";
 
 export interface BoardProps {
@@ -13,15 +13,15 @@ function Board({ height, width }: BoardProps) {
 	const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
 	const [locked, setLocked] = useState(false);
 	const snake = useAppSelector((state) => state.game.snake);
-	const [pos, setPos] = useState(generateRandomPosition(width - 20, height - 20, snake));
+  const food = useAppSelector((state) => state.game.food);
 	const end = useAppSelector((state) => state.game.end);
 	const [time, setTime] = useState(0);
-	const [speed, setSpeed] = useState(1);
+	const speed = useAppSelector((state) => state.game.speed);
 	const dispatch = useAppDispatch();
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setTime((prev) => prev + 1);
-		}, 1000 / speed);
+		}, 1000 / (speed/100));
 		if (end) {
 			clearInterval(interval);
 			window.removeEventListener("keydown", handleKeyDown);
@@ -29,9 +29,10 @@ function Board({ height, width }: BoardProps) {
 		return () => clearInterval(interval);
 	}, [speed, end]);
 	useEffect(() => {
+    if(!food) return;
 		setContext(canvasRef.current?.getContext("2d") ?? null);
 		clearBoard(context, width, height);
-		drawObject(context, [pos], "#676FA3");
+		drawObject(context, [food], "#676FA3");
 		drawObject(context, snake, "#91c483");
 		dispatch(move());
 		setLocked(false)
@@ -59,6 +60,7 @@ function Board({ height, width }: BoardProps) {
 	};
 	useEffect(() => {
 		window.addEventListener("keydown", handleKeyDown);
+    dispatch(addFood())
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, []);
 	return (
