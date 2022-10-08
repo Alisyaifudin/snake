@@ -11,47 +11,56 @@ export interface BoardProps {
 function Board({ height, width }: BoardProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
+	const [locked, setLocked] = useState(false);
 	const snake = useAppSelector((state) => state.game.snake);
 	const [pos, setPos] = useState(generateRandomPosition(width - 20, height - 20, snake));
-  const [time, setTime] = useState(0);
-  const [speed, setSpeed] = useState(1);
+	const end = useAppSelector((state) => state.game.end);
+	const [time, setTime] = useState(0);
+	const [speed, setSpeed] = useState(1);
 	const dispatch = useAppDispatch();
 	useEffect(() => {
 		const interval = setInterval(() => {
-      setTime(prev=>prev+1);
-		}, 1000/speed);
+			setTime((prev) => prev + 1);
+		}, 1000 / speed);
+		if (end) {
+			clearInterval(interval);
+			window.removeEventListener("keydown", handleKeyDown);
+		}
 		return () => clearInterval(interval);
-	}, [speed]);
+	}, [speed, end]);
 	useEffect(() => {
 		setContext(canvasRef.current?.getContext("2d") ?? null);
-    clearBoard(context, width, height);
+		clearBoard(context, width, height);
 		drawObject(context, [pos], "#676FA3");
-    drawObject(context, snake, "#91c483");
-    dispatch(move())
+		drawObject(context, snake, "#91c483");
+		dispatch(move());
+		setLocked(false)
 	}, [context, time]);
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    switch (e.key) {
-      case "ArrowUp":
-        dispatch(changeDirection(MOVE.UP));
-        break;
-      case "ArrowDown":
-        dispatch(changeDirection(MOVE.DOWN));
-        break;
-      case "ArrowLeft":
-        dispatch(changeDirection(MOVE.LEFT));
-        break;
-      case "ArrowRight":
-        dispatch(changeDirection(MOVE.RIGHT));
-        break;
-      default:
-        break;
-    }
-  };
-    useEffect(()=> {
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [])
+	const handleKeyDown = (e: KeyboardEvent) => {
+		if (locked) return;
+		switch (e.key) {
+			case "ArrowUp":
+				dispatch(changeDirection(MOVE.UP));
+				break;
+			case "ArrowDown":
+				dispatch(changeDirection(MOVE.DOWN));
+				break;
+			case "ArrowLeft":
+				dispatch(changeDirection(MOVE.LEFT));
+				break;
+			case "ArrowRight":
+				dispatch(changeDirection(MOVE.RIGHT));
+				break;
+			default:
+				break;
+		}
+		setLocked(true);
+	};
+	useEffect(() => {
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, []);
 	return (
 		<canvas
 			className="border-2 border-black border-solid"

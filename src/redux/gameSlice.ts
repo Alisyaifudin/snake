@@ -22,7 +22,8 @@ export interface GameState {
 		width: number;
 		height: number;
 	};
-	locked: boolean;
+  win: boolean;
+  end: boolean;
 }
 
 const initialState: GameState = {
@@ -32,6 +33,10 @@ const initialState: GameState = {
 		{ x: 540, y: 300 },
 		{ x: 560, y: 300 },
 		{ x: 580, y: 300 },
+    { x: 600, y: 300 },
+    { x: 620, y: 300 },
+    { x: 640, y: 300 },
+    { x: 660, y: 300 },
 	],
 	move: MOVE.RIGHT,
 	oppositeMove: MOVE.LEFT,
@@ -39,7 +44,8 @@ const initialState: GameState = {
 		width: 1000,
 		height: 600,
 	},
-	locked: false,
+  win: false,
+  end: false,
 };
 
 export const gameSlice = createSlice({
@@ -66,13 +72,17 @@ export const gameSlice = createSlice({
 				default:
 					break;
 			}
+      snake.shift();
+      if (snake.some((coord) => coord.x === newHead.x && coord.y === newHead.y)) {
+        state.win = false;
+        state.end = true;
+        return;
+      }
 			snake.push(newHead);
-			snake.shift();
-			state.locked = false;
 		},
 		changeDirection: (state, action: PayloadAction<MOVE>) => {
-			if (action.payload !== state.oppositeMove && action.payload !== state.move && !state.locked) {
-				state.move = action.payload;
+			if (action.payload !== state.oppositeMove && action.payload !== state.move) {
+        state.move = action.payload;
 				switch (action.payload) {
 					case MOVE.UP:
 						state.oppositeMove = MOVE.DOWN;
@@ -89,7 +99,6 @@ export const gameSlice = createSlice({
 					default:
 						break;
 				}
-				state.locked = true;
 			}
 		},
 	},
