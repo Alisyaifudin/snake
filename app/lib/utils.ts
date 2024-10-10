@@ -8,14 +8,14 @@ export const clearBoard = (
 	}
 };
 
-export interface ObjectProps {
+export interface Position {
 	x: number;
 	y: number;
 }
 
 export const drawObject = (
 	context: CanvasRenderingContext2D | null,
-	objects: ObjectProps[],
+	objects: Position[],
 	fillStyle: string,
 	strokeStyle = "#146356"
 ) => {
@@ -32,8 +32,9 @@ export const drawObject = (
 export const generateRandomPosition = (
 	width: number,
 	height: number,
-	disallowed: ObjectProps[]
-): ObjectProps => {
+	disallowed: Position[] = []
+): Position => {
+	// eslint-disable-next-line no-constant-condition
 	while (true) {
 		const x = Math.floor((Math.random() * width) / 20) * 20;
 		const y = Math.floor((Math.random() * height) / 20) * 20;
