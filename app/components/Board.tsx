@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { clearBoard, drawObject, generateRandomPosition, Position } from "~/lib/utils";
 import { DIMENSIONS, TILE } from "~/lib/constants";
 import { MOVE } from "~/routes/_index";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from "lucide-react";
 
 enum KEY {
 	UP,
@@ -311,12 +312,20 @@ function Board({
 			/>
 			<div className="flex justify-center p-2">
 				<div className="flex items-center flex-col gap-1">
-					<Arrow onClick={handleClick(KEY.UP)} disabled={isPaused}>↑</Arrow>
-					<div className="flex gap-5">
-						<Arrow onClick={handleClick(KEY.LEFT)} disabled={isPaused}>←</Arrow>
-						<Arrow onClick={handleClick(KEY.RIGHT)} disabled={isPaused}>→</Arrow>
+					<Arrow onClick={handleClick(KEY.UP)} disabled={isPaused}>
+						<ArrowUp className="w-10 h-10" />
+					</Arrow>
+					<div className="flex gap-10">
+						<Arrow onClick={handleClick(KEY.LEFT)} disabled={isPaused}>
+							<ArrowLeft className="w-10 h-10" />
+						</Arrow>
+						<Arrow onClick={handleClick(KEY.RIGHT)} disabled={isPaused}>
+							<ArrowRight className="w-10 h-10" />
+						</Arrow>
 					</div>
-					<Arrow onClick={handleClick(KEY.DOWN)} disabled={isPaused}>↓</Arrow>
+					<Arrow onClick={handleClick(KEY.DOWN)} disabled={isPaused}>
+						<ArrowDown className="w-10 h-10" />
+					</Arrow>
 				</div>
 			</div>
 		</div>
@@ -325,12 +334,20 @@ function Board({
 
 export default Board;
 
-const Arrow = ({ children, onClick, disabled }: { children: string; onClick: () => void, disabled: boolean }) => (
+const Arrow = ({
+	children,
+	onClick,
+	disabled,
+}: {
+	children: React.ReactNode;
+	onClick: () => void;
+	disabled: boolean;
+}) => (
 	<button
 		onClick={onClick}
 		disabled={disabled}
-		className="bg-gray-200 dark:bg-zinc-800 rounded-md shadow-md min-w-[25px] w-fit px-1"
+		className="bg-gray-200 dark:bg-zinc-800 rounded-md shadow-md px-1"
 	>
-		<p className="text-center">{children}</p>
+		{children}
 	</button>
 );

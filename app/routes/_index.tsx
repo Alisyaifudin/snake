@@ -1,9 +1,10 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { MetaFunction } from "@remix-run/cloudflare";
 import { useRef, useState } from "react";
 import Board from "~/components/Board";
 import Instruction from "~/components/Instruction";
 import Score from "~/components/Score";
-import {  Position } from "~/lib/utils";
+import { Position } from "~/lib/utils";
+
 export const meta: MetaFunction = () => {
 	return [{ title: "Snaky" }];
 };
@@ -83,23 +84,3 @@ export default function Index() {
 		</main>
 	);
 }
-
-// const initialPosition = [
-// 	{ x: 500, y: 300 },
-// 	{ x: 520, y: 300 },
-// 	{ x: 540, y: 300 },
-// ];
-
-// const initialState = {
-// 	snake: initialPosition,
-// 	move: MOVE.RIGHT,
-// 	oppositeMove: MOVE.LEFT,
-// 	dimensions: {
-// 		width: 1000,
-// 		height: 600,
-// 	},
-// 	end: false,
-// 	paused: false,
-// 	speed: 300,
-// 	changed: false,
-// };
